@@ -1,3 +1,5 @@
+## STILL SOME ERRORS, DON'T USE
+
 ## imageoptimizer-brunch
 Optimize PNG and JPG images with optipng &amp; jpegtran on --optimize with 
 [brunch](http://brunch.io).
