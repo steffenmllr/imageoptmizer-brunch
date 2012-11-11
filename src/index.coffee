@@ -43,7 +43,7 @@ module.exports = class ImageOptimzer
         pngFileSizeAfter = @calculateSizeFromImages(pngfiles)  
         percent = (((pngFileSizeBefore/pngFileSizeAfter)-1)*100).toFixed(2)
         console.log 'Compressed ' + pngfiles.length + ' png files: saved '+percent+'% (before: ' + pngFileSizeBefore + ' - after: ' + pngFileSizeAfter + ' bytes)'
-    
+    ###    
     # Compress JPG Files
     if jpgfiles.length
       jpgFileSizeBefore = @calculateSizeFromImages(jpgfiles)      
@@ -51,7 +51,7 @@ module.exports = class ImageOptimzer
         jpgFileSizeAfter = @calculateSizeFromImages(jpgfiles)  
         percent = (((jpgFileSizeBefore/jpgFileSizeAfter)-1)*100).toFixed(2)
         console.log 'Compressed ' + jpgfiles.length + ' jpg files: saved '+percent+'% (before: ' + jpgFileSizeBefore + ' - after: ' + jpgFileSizeAfter + ' bytes)'
-    
+    ###
     return this
 
   calculateSizeFromImages: (files) ->
