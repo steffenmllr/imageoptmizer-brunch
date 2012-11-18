@@ -25,7 +25,7 @@ module.exports = class ImageOptimzer
   onCompile: (generatedFiles) ->    
     return unless @config.minify
     if @config.imageoptimizer?.smushit
-      smushit.smushit @imagePath
+      smushit.smushit @imagePath, recursive: true
     else      
       files = @readDirSync(@imagePath)
 
