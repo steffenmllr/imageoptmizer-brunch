@@ -19,11 +19,24 @@
   },
   "dependencies": {
     "coffee-script": "1.3.3",
-    "node-smushit":"0.4.0",
+    "node-smushit": "0.4.0",
     "path": "0.4.9"
   },
   "devDependencies": {
     "mocha": "1.3.2",
     "chai": "1.2.0"
-  }
+  },
+  "readmeFilename": "README.md",
+  "directories": {
+    "test": "test"
+  },
+  "keywords": [
+    "brunch",
+    "images",
+    "optmizer",
+    "jpegtran",
+    "optipng",
+    "smushit"
+  ],
+  "license": "MIT"
 }
