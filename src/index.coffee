@@ -1,7 +1,8 @@
 {spawn, exec} = require 'child_process'
 fs = require "fs"
 path = require "path"
-wrench = require 'wrench'
+sysPath = require 'path'
+smushit  = require 'node-smushit'
 exists = fs.exists or path.exists
 
 module.exports = class ImageOptimzer
@@ -10,49 +11,34 @@ module.exports = class ImageOptimzer
   jpegs : [".jpg", "jpeg"]    
   _PNGBin : 'optipng'
   _JPGBin: 'jpegtran'  
-  constructor: (@config) -> 
-    exec "#{@_PNGBin} --version", (error, stdout, stderr) =>
-      console.error "You need to have optipng on your system" if error        
+  imagePath: 'images'
+  constructor: (@config) ->     
+    @imagePath = @config.imageoptimizer.path if @config.imageoptimizer?.path 
+    @imagePath = sysPath.join @config.paths.public, @imagePath    
 
-    exec "#{@_JPGBin} -v", (error, stdout, stderr) =>
-      console.error "You need to have jpegtran on your system" if error        
-
+    #console.log @imagePath @config.paths.public
+    unless @config.imageoptimizer?.smushit
+      exec "#{@_PNGBin} --version", (error, stdout, stderr) =>
+        console.error "You need to have optipng and jpegtran on your system" if error
     null
 
-  onCompile: (generatedFiles) ->
-    return unless @config.minify    
-    files = wrench.readdirSyncRecursive @config.paths.public    
-    
-    # Add Images
-    files = files.map (file) =>
-      @config.paths.public + '/' + file
+  onCompile: (generatedFiles) ->    
+    return unless @config.minify
+    if @config.imageoptimizer?.smushit
+      smushit.smushit @imagePath
+    else      
+      files = @readDirSync(@imagePath)
 
-    # Scan for Png Files
-    pngfiles = files.filter((file) =>
-      !!~@png.indexOf(path.extname(file).toLowerCase())
-    )
+      # Compress PNG Files
+      if files.png.length
+        @optimizePNG files.png, (error, result) =>
+          console.log "Compressed #{files.png.length} png files via #{@_PNGBin}"
 
-    # Scan for JPG Files
-    jpgfiles = files.filter((file) =>
-      !!~@jpegs.indexOf(path.extname(file).toLowerCase())
-    )    	
-    # Compress PNG Files
-    if pngfiles.length
-      pngFileSizeBefore = @calculateSizeFromImages(pngfiles)      
-      @optimizePNG pngfiles, (error, result) =>
-        pngFileSizeAfter = @calculateSizeFromImages(pngfiles)  
-        percent = (((pngFileSizeBefore/pngFileSizeAfter)-1)*100).toFixed(2)
-        console.log 'Compressed ' + pngfiles.length + ' png files: saved '+percent+'% (before: ' + pngFileSizeBefore + ' - after: ' + pngFileSizeAfter + ' bytes)'
-    ###    
-    # Compress JPG Files
-    if jpgfiles.length
-      jpgFileSizeBefore = @calculateSizeFromImages(jpgfiles)      
-      @optimizeJPG jpgfiles, (error, result) =>        
-        jpgFileSizeAfter = @calculateSizeFromImages(jpgfiles)  
-        percent = (((jpgFileSizeBefore/jpgFileSizeAfter)-1)*100).toFixed(2)
-        console.log 'Compressed ' + jpgfiles.length + ' jpg files: saved '+percent+'% (before: ' + jpgFileSizeBefore + ' - after: ' + jpgFileSizeAfter + ' bytes)'
-    ###
-    return this
+      # Compress JPG Files
+      if files.jpeg.length
+        filesjpeg = files.jpeg.slice(0);
+        @optimizeJPG files.jpeg, (error, result) =>        
+          console.log "Compressed #{filesjpeg.length} jpeg files via #{@_JPGBin}"
 
   calculateSizeFromImages: (files) ->
     size = 0;
@@ -60,6 +46,36 @@ module.exports = class ImageOptimzer
       size += fs.statSync(file).size
 
     return size
+
+
+  readDirSync: (baseDir) ->
+    ## Mostly borrowed from npm wrench. thanks
+    baseDir = baseDir.replace(/\/$/, "")
+    fileList = {
+      png: []
+      jpeg: []
+    }
+    readdirSyncRecursive = (baseDir) ->
+      files = []
+      isDir = (fname) ->
+        fs.statSync(sysPath.join(baseDir, fname)).isDirectory()
+      prependBaseDir = (fname) ->        
+        sysPath.join baseDir, fname
+      
+      curFiles = fs.readdirSync(baseDir)      
+      nextDirs = curFiles.filter(isDir)
+      curFiles = curFiles.map(prependBaseDir)      
+      files = files.concat(curFiles)      
+      files = files.concat(readdirSyncRecursive(sysPath.join(baseDir, nextDirs.shift())))  while nextDirs.length
+      
+      files
+    
+    readdirSyncRecursive(baseDir).forEach((filepath) =>
+      fileList.png.push(filepath) if !!~@png.indexOf(path.extname(filepath).toLowerCase())
+      fileList.jpeg.push(filepath) if !!~@jpegs.indexOf(path.extname(filepath).toLowerCase())
+    )
+
+    return fileList
 
   optimizeJPG: (files,  callback) ->
     error = null
