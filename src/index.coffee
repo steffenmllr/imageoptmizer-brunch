@@ -8,13 +8,13 @@ exists = fs.exists or path.exists
 module.exports = class ImageOptimzer
   brunchPlugin: yes
   png : [".png", ".bmp", ".gif", ".pnm", ".tiff"]
-  jpegs : [".jpg", "jpeg"]    
+  jpegs : [".jpg", "jpeg"]
   _PNGBin : 'optipng'
-  _JPGBin: 'jpegtran'  
+  _JPGBin: 'jpegtran'
   imagePath: 'images'
-  constructor: (@config) ->     
-    @imagePath = @config.imageoptimizer.path if @config.imageoptimizer?.path 
-    @imagePath = sysPath.join @config.paths.public, @imagePath    
+  constructor: (@config) ->
+    @imagePath = @config.imageoptimizer.path if @config.imageoptimizer?.path
+    @imagePath = sysPath.join @config.paths.public, @imagePath
 
     #console.log @imagePath @config.paths.public
     unless @config.imageoptimizer?.smushit
@@ -22,11 +22,13 @@ module.exports = class ImageOptimzer
         console.error "You need to have optipng and jpegtran on your system" if error
     null
 
-  onCompile: (generatedFiles) ->    
-    return unless @config.minify
+  onCompile: (generatedFiles) ->
+    return unless @config.optimize
+    return unless fs.existsSync(@imagePath)
+
     if @config.imageoptimizer?.smushit
       smushit.smushit @imagePath, recursive: true
-    else      
+    else
       files = @readDirSync(@imagePath)
 
       # Compress PNG Files
@@ -37,7 +39,7 @@ module.exports = class ImageOptimzer
       # Compress JPG Files
       if files.jpeg.length
         filesjpeg = files.jpeg.slice(0);
-        @optimizeJPG files.jpeg, (error, result) =>        
+        @optimizeJPG files.jpeg, (error, result) =>
           console.log "Compressed #{filesjpeg.length} jpeg files via #{@_JPGBin}"
 
   calculateSizeFromImages: (files) ->
@@ -59,17 +61,17 @@ module.exports = class ImageOptimzer
       files = []
       isDir = (fname) ->
         fs.statSync(sysPath.join(baseDir, fname)).isDirectory()
-      prependBaseDir = (fname) ->        
+      prependBaseDir = (fname) ->
         sysPath.join baseDir, fname
-      
-      curFiles = fs.readdirSync(baseDir)      
+
+      curFiles = fs.readdirSync(baseDir)
       nextDirs = curFiles.filter(isDir)
-      curFiles = curFiles.map(prependBaseDir)      
-      files = files.concat(curFiles)      
+      curFiles = curFiles.map(prependBaseDir)
+      files = files.concat(curFiles)
       files = files.concat(readdirSyncRecursive(sysPath.join(baseDir, nextDirs.shift())))  while nextDirs.length
-      
+
       files
-    
+
     readdirSyncRecursive(baseDir).forEach((filepath) =>
       fileList.png.push(filepath) if !!~@png.indexOf(path.extname(filepath).toLowerCase())
       fileList.jpeg.push(filepath) if !!~@jpegs.indexOf(path.extname(filepath).toLowerCase())
@@ -79,32 +81,32 @@ module.exports = class ImageOptimzer
 
   optimizeJPG: (files,  callback) ->
     error = null
-    result = ''    
+    result = ''
     tmpfile = 'jpgtmp.jpg'
-    options = [    
+    options = [
       '-copy'
       'none'
       '-optimize'
       '-outfile'
       'jpgtmp.jpg'
-    ] 
+    ]
 
-    (run = (file) =>      
+    (run = (file) =>
       return clean() unless file
-      args = options.concat file      
+      args = options.concat file
       wStream = null
 
       jpegtran = spawn @_JPGBin, args
-      jpegtran.on 'exit', (code) =>        
+      jpegtran.on 'exit', (code) =>
         return if code
         wStream = fs.createWriteStream(file, {flags: 'w'}).pipe(fs.createReadStream(tmpfile))
         wStream.on "close", (test) =>
           run files.shift()
     ) files.shift()
 
-    clean = =>      
+    clean = =>
       exists tmpfile, (exists) =>
-        return callback(result, error) unless exists    
+        return callback(result, error) unless exists
         fs.unlink tmpfile, (err) =>
           callback(result, error)
 
@@ -113,7 +115,7 @@ module.exports = class ImageOptimzer
   optimizePNG: (files, callback) ->
     error = null
     result = ''
-    options = [     
+    options = [
     ]
 
     args = options.concat files
