@@ -98,10 +98,10 @@ module.exports = class ImageOptimzer
 
       jpegtran = spawn @_JPGBin, args
       jpegtran.on 'exit', (code) =>
+        console.log 'jpegtran exit'
         return if code
-        wStream = fs.createWriteStream(file, {flags: 'w'}).pipe(fs.createReadStream(tmpfile))
-        wStream.on "close", (test) =>
-          run files.shift()
+        fs.writeFileSync(file, fs.readFileSync(tmpfile));
+        run files.shift()
     ) files.shift()
 
     clean = =>
