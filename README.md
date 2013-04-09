@@ -17,7 +17,7 @@ brew install optipng jpeg
 ```
 
 ## Usage
-Add `"imageoptmizer-brunch": "0.0.2"` to `package.json` of your brunch app.
+Add `"imageoptmizer-brunch": "0.0.3"` to `package.json` of your brunch app.
 
 Pick a plugin version that corresponds to your minor (y) brunch version.
 

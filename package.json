@@ -1,6 +1,6 @@
 {
   "name": "imageoptmizer-brunch",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Optimize PNG and JPG images with optipng & jpegtran on --optimize",
   "author": "Steffen Müller (http://steffen.io/)",
   "homepage": "https://github.com/digitalhero/imageoptmizer-brunch",
