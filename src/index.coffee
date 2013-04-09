@@ -98,7 +98,6 @@ module.exports = class ImageOptimzer
 
       jpegtran = spawn @_JPGBin, args
       jpegtran.on 'exit', (code) =>
-        console.log 'jpegtran exit'
         return if code
         fs.writeFileSync(file, fs.readFileSync(tmpfile));
         run files.shift()
