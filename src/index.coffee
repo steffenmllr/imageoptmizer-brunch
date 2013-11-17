@@ -13,11 +13,14 @@ module.exports = class ImageOptimzer
   _JPGBin: 'jpegtran'
   imagePath: 'images'
   constructor: (@config) ->
-    @imagePath = @config.imageoptimizer.path if @config.imageoptimizer?.path
+    if @config.imageoptimizer?
+      console.warn 'Configuration for ImageOptimzer has been moved from config.imageoptimizer to config.plugins.imageoptimizer. Please adjust your Brunch config file accordingly.'
+
+    @imagePath = @config.plugins.imageoptimizer.path if @config.plugins?.imageoptimizer?.path
     @imagePath = sysPath.join @config.paths.public, @imagePath
 
     #console.log @imagePath @config.paths.public
-    unless @config.imageoptimizer?.smushit
+    unless @config.plugins?.imageoptimizer?.smushit
       exec "#{@_PNGBin} --version", (error, stdout, stderr) =>
         console.error "You need to have optipng and jpegtran on your system" if error
     null
@@ -26,7 +29,7 @@ module.exports = class ImageOptimzer
     return unless @config.optimize
     return unless fs.existsSync(@imagePath)
 
-    if @config.imageoptimizer?.smushit
+    if @config.plugins?.imageoptimizer?.smushit
       smushit.smushit @imagePath, recursive: true
     else
       files = @readDirSync(@imagePath)
