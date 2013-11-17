@@ -13,6 +13,9 @@ module.exports = class ImageOptimzer
   _JPGBin: 'jpegtran'
   imagePath: 'images'
   constructor: (@config) ->
+    if @config.imageoptimizer?
+      console.warn "Configuration for ImageOptimzer has been moved from config.imageoptimizer to config.plugins.imageoptimizer."
+
     @imagePath = @config.plugins.imageoptimizer.path if @config.plugins?.imageoptimizer?.path
     @imagePath = sysPath.join @config.paths.public, @imagePath
 
