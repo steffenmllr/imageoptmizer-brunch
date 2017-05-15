@@ -15,6 +15,13 @@ brew install optipng jpeg
     smushit: false # if false it use jpegtran and optipng, if set to true it will use smushit
     path: 'images' # your image path within your public folder
 ```
+You can also pass a specific service with smushit
+```coffeescript
+  imageoptimizer:
+    smushit:
+      service: 'http://api.resmush.it/ws.php' # uses api.resmush.it instead of Yahoo
+    path: 'images' # your image path within your public folder
+```
 
 ## Usage
 Add `"imageoptmizer-brunch": "0.0.4"` to `package.json` of your brunch app.
