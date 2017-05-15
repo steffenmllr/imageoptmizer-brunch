@@ -30,7 +30,9 @@ module.exports = class ImageOptimzer
     return unless fs.existsSync(@imagePath)
 
     if @config.plugins?.imageoptimizer?.smushit
-      smushit.smushit @imagePath, recursive: true
+      smushit.smushit @imagePath,
+        recursive: true,
+        service: @config.plugins?.imageoptimizer?.smushit.service || ''
     else
       files = @readDirSync(@imagePath)
 
