@@ -1,3 +1,5 @@
+> Looking for a maintainer - does not work with latest brunch version
+
 ## imageoptimizer-brunch
 Optimize PNG and JPG images on --optimize with [brunch](http://brunch.io).
 It either uses [jpegtran](http://jpegclub.org/jpegtran/) and [optipng](http://optipng.sourceforge.net/) or [node-smushit](https://github.com/colorhook/node-smushit) to get the best out of your images in your /public folder.
